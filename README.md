@@ -4,4 +4,4 @@ Annotation page for a study on how badly image edits fail. Open the page, read t
 
 Page: https://fedebecat.github.io/human_test_amortized/
 
-Results (study authors only, password required): https://fedebecat.github.io/human_test_amortized/results.html
+Results: https://fedebecat.github.io/human_test_amortized/results.html
