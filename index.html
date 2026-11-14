@@ -116,78 +116,149 @@ img { max-width: 100%; }
 .namebox label { font-weight: 700; font-size: 0.9rem; }
 .namebox input { font: 1rem var(--font-body); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
 .namebox input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.lang button { font: 500 0.8rem var(--font-mono); padding: 6px 9px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
+.lang button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.lang button:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 </style>
 </head>
 <body>
 <header class="bar">
   <div class="bar-in">
-    <h1>Edit Failure Study</h1>
-    <span class="progress" id="progress">0 / 0 rated</span>
+    <h1 data-i18n="title">Edit Failure Study</h1>
+    <span class="progress" id="progress"></span>
     <div class="meter" aria-hidden="true"><i id="meter"></i></div>
-    <span class="chip" id="status">Loading…</span>
-    <button class="btn" id="toggle-help" type="button">Instructions</button>
+    <span class="chip" id="status"></span>
+    <div class="lang" role="group" aria-label="Language / Lingua">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="it" aria-pressed="false">IT</button>
+    </div>
+    <button class="btn" id="toggle-help" type="button" data-i18n="instructions">Instructions</button>
   </div>
 </header>
 
 <main class="wrap">
   <section class="card" id="help">
-    <span class="eyebrow">Before you start</span>
-    <h2>Rate how badly an image edit has failed</h2>
-    <p>Each item shows two results of the same image editor, run with the same text prompt and the same random seed. The <strong>left</strong> image is the reference: the edit made from the original photo. The <strong>right</strong> image was made from a version of the photo that may have been altered so that editing goes wrong; some items are controls, so the right image can also be a normal edit or exactly the reference.</p>
-    <p>Compared with the reference, how badly has the edit on the right failed?</p>
+    <span class="eyebrow" data-i18n="before">Before you start</span>
+    <h2 data-i18n="help_title">Rate how badly an image edit has failed</h2>
+    <p data-i18n-html="help_p1"></p>
+    <p data-i18n="help_p2"></p>
     <dl class="scale-ref">
-      <dt>1</dt><dd>Identical to the reference, or the requested edit is fully carried out with no damage.</dd>
-      <dt>4</dt><dd>Visible damage, but the requested edit is still partly recognizable.</dd>
-      <dt>7</dt><dd>The edit is destroyed: the requested change is missing, or the image is ruined.</dd>
+      <dt>1</dt><dd data-i18n="anchor1_long"></dd>
+      <dt>4</dt><dd data-i18n="anchor4_long"></dd>
+      <dt>7</dt><dd data-i18n="anchor7_long"></dd>
     </dl>
     <ul>
-      <li>Use 2, 3, 5 and 6 for the levels in between.</li>
-      <li>Look at whether the requested change is there, whether the subject is still recognizable, and at noise, blur, color or texture damage, and changes to parts of the image that should stay as they were.</li>
-      <li>Differences of pose or framing that a different but valid edit could also have produced count less than damage.</li>
-      <li>There are 300 items, about 30 to 40 minutes in all. Every rating is sent at once and also kept in this browser: you can stop and come back later on the same device and browser.</li>
-      <li>Keyboard: <kbd>1</kbd>–<kbd>7</kbd> rate and move on, <kbd>←</kbd> goes back, <kbd>→</kbd> goes forward to items you already rated.</li>
+      <li data-i18n="tip_between"></li>
+      <li data-i18n="tip_look"></li>
+      <li data-i18n="tip_pose"></li>
+      <li data-i18n="tip_time"></li>
+      <li data-i18n-html="tip_keys"></li>
     </ul>
     <div class="namebox">
-      <label for="name">Your name or initials (optional)</label>
-      <input id="name" type="text" maxlength="80" autocomplete="off" placeholder="e.g. A.B.">
+      <label for="name" data-i18n="name_label">Your name or initials (optional)</label>
+      <input id="name" type="text" maxlength="80" autocomplete="off">
     </div>
     <div class="notice" id="access-note" hidden></div>
-    <div class="nav"><span class="hint">Ratings go only to the study's organizers.</span>
-      <button class="btn primary" id="start" type="button">Start rating</button></div>
+    <div class="nav"><span class="hint" data-i18n="privacy"></span>
+      <button class="btn primary" id="start" type="button"></button></div>
   </section>
 
   <section class="card" id="task" hidden>
-    <div><span class="eyebrow" id="item-label">Item</span></div>
-    <div class="prompt">Prompt: <q id="prompt"></q></div>
+    <div><span class="eyebrow" id="item-label"></span></div>
+    <div class="prompt"><span data-i18n="prompt_label">Prompt:</span> <q id="prompt"></q></div>
     <div class="pair">
-      <div class="labels"><span>Reference edit</span><span>Edit to rate</span></div>
-      <img id="pair-img" alt="Left: reference edit. Right: the edit to rate." width="776" height="384">
+      <div class="labels"><span data-i18n="ref_label">Reference edit</span><span data-i18n="rate_label">Edit to rate</span></div>
+      <img id="pair-img" alt="" width="776" height="384">
     </div>
-    <div class="scale" id="scale" role="group" aria-label="Rating from 1 (no failure) to 7 (edit destroyed)"></div>
-    <div class="anchors" aria-hidden="true"><span>1 identical / edit done</span><span>4 damaged, edit still recognizable</span><span>7 edit destroyed</span></div>
+    <div class="scale" id="scale" role="group"></div>
+    <div class="anchors" aria-hidden="true"><span data-i18n="anchor1"></span><span data-i18n="anchor4"></span><span data-i18n="anchor7"></span></div>
     <div class="nav">
-      <button class="btn" id="back" type="button">← Back</button>
+      <button class="btn" id="back" type="button" data-i18n="back">← Back</button>
       <span class="hint" id="item-hint"></span>
-      <button class="btn" id="forward" type="button">Forward →</button>
+      <button class="btn" id="forward" type="button" data-i18n="forward">Forward →</button>
     </div>
   </section>
 
   <section class="card" id="done" hidden>
-    <span class="eyebrow">Finished</span>
-    <h2>All 300 items are rated. Thank you.</h2>
-    <p id="done-status">Your ratings have been sent.</p>
+    <span class="eyebrow" data-i18n="finished">Finished</span>
+    <h2 data-i18n="done_title"></h2>
+    <p id="done-status"></p>
     <div class="nav">
-      <button class="btn" id="review" type="button">Review my ratings</button>
-      <button class="btn" id="download" type="button">Download my ratings (backup)</button>
+      <button class="btn" id="review" type="button" data-i18n="review"></button>
+      <button class="btn" id="download" type="button" data-i18n="download"></button>
     </div>
   </section>
 </main>
 
 <script>
 const ENDPOINT = "https://script.google.com/macros/s/AKfycbyXTrqwqr-r8537aqa3F4oWnraUoQh20ZdodVioFPjf__qXIl2t5BxYGsx-GC1fjJYd/exec";  // Google Apps Script web app URL, ending in /exec
-const VERSION = "v1";
+const VERSION = "v2";
 const PAIRS = [{"id":"p001","prompt":"A basket of oranges."},{"id":"p002","prompt":"A standing elephant."},{"id":"p003","prompt":"A parade on a street."},{"id":"p004","prompt":"An image of a post apocalyptic road."},{"id":"p005","prompt":"A circus horse."},{"id":"p006","prompt":"A photo of a couple holding their hands on a beach."},{"id":"p007","prompt":"A photo of a sleeping cat."},{"id":"p008","prompt":"A standing bear."},{"id":"p009","prompt":"A horse in a show jumping attire."},{"id":"p010","prompt":"A photo of a jumping dog."},{"id":"p011","prompt":"A cyclist riding in a street."},{"id":"p012","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p013","prompt":"A photo of a cat from behind."},{"id":"p014","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p015","prompt":"A goat to the right of a cat."},{"id":"p016","prompt":"A photo of a jumping cat."},{"id":"p017","prompt":"Image of a cat wearing a floral shirt."},{"id":"p018","prompt":"A photo of a zebra."},{"id":"p019","prompt":"Image of a cat wearing a floral shirt."},{"id":"p020","prompt":"Image of a cat wearing a floral shirt."},{"id":"p021","prompt":"A dog smoking a cigar."},{"id":"p022","prompt":"A photo of a horse."},{"id":"p023","prompt":"A vase of flowers as a child’s drawing."},{"id":"p024","prompt":"A car in the year 1940."},{"id":"p025","prompt":"A car in futuristic art style."},{"id":"p026","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p027","prompt":"A convertible car."},{"id":"p028","prompt":"Pizza with pepperoni."},{"id":"p029","prompt":"An image of a post apocalyptic road."},{"id":"p030","prompt":"A pot of flowers."},{"id":"p031","prompt":"A photo of a cat yawning."},{"id":"p032","prompt":"A standing horse."},{"id":"p033","prompt":"A standing horse."},{"id":"p034","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p035","prompt":"A photo of a cat from behind."},{"id":"p036","prompt":"A photo of a cat yawning."},{"id":"p037","prompt":"An image of a post apocalyptic road."},{"id":"p038","prompt":"A standing elephant."},{"id":"p039","prompt":"A standing horse."},{"id":"p040","prompt":"A road in futuristic art style."},{"id":"p041","prompt":"A basket of oranges."},{"id":"p042","prompt":"A photo of a cat facing the camera."},{"id":"p043","prompt":"A cookie next to a glass of juice."},{"id":"p044","prompt":"A bear eating a fish."},{"id":"p045","prompt":"A photo of a sleeping cat."},{"id":"p046","prompt":"A photo of a sleeping cat."},{"id":"p047","prompt":"A goat to the right of a cat."},{"id":"p048","prompt":"A standing elephant."},{"id":"p049","prompt":"A race car."},{"id":"p050","prompt":"A standing bear."},{"id":"p051","prompt":"A white horse in Anime style."},{"id":"p052","prompt":"A cookie next to a glass of juice."},{"id":"p053","prompt":"A car in the year 1940."},{"id":"p054","prompt":"A photo of a car in Manhattan."},{"id":"p055","prompt":"Pizza with pepperoni."},{"id":"p056","prompt":"A photo of a traffic jam."},{"id":"p057","prompt":"Image of a cat wearing a floral shirt."},{"id":"p058","prompt":"A photo of a cat wearing a hat."},{"id":"p059","prompt":"A photo of a car in Manhattan."},{"id":"p060","prompt":"A car in the year 1940."},{"id":"p061","prompt":"A photo of a vase of daisies."},{"id":"p062","prompt":"A horse in a show jumping attire."},{"id":"p063","prompt":"A dog smoking a cigar."},{"id":"p064","prompt":"A photo of a cat wearing a hat."},{"id":"p065","prompt":"A basket of oranges."},{"id":"p066","prompt":"A race car."},{"id":"p067","prompt":"A torn up teddy bear."},{"id":"p068","prompt":"A photo of a vase of colorful tulips."},{"id":"p069","prompt":"A goat to the right of a cat."},{"id":"p070","prompt":"A standing bear."},{"id":"p071","prompt":"A bowl of apples."},{"id":"p072","prompt":"A standing elephant."},{"id":"p073","prompt":"A standing horse."},{"id":"p074","prompt":"A photo of a cat yawning."},{"id":"p075","prompt":"A photo of a jumping dog."},{"id":"p076","prompt":"A circus horse."},{"id":"p077","prompt":"A race car."},{"id":"p078","prompt":"A photo of a cat facing the camera."},{"id":"p079","prompt":"Pizza with pepperoni."},{"id":"p080","prompt":"A cyclist riding in a street."},{"id":"p081","prompt":"A photo of a zebra."},{"id":"p082","prompt":"A photo of a willow tree."},{"id":"p083","prompt":"A photo of a vase of red roses."},{"id":"p084","prompt":"A photo of a yawning dog."},{"id":"p085","prompt":"A photo of a jumping dog."},{"id":"p086","prompt":"A convertible car."},{"id":"p087","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p088","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p089","prompt":"A photo of a cat wearing a hat."},{"id":"p090","prompt":"A photo of a willow tree."},{"id":"p091","prompt":"A pot of flowers."},{"id":"p092","prompt":"A basket of oranges."},{"id":"p093","prompt":"A bear eating a fish."},{"id":"p094","prompt":"A torn up teddy bear."},{"id":"p095","prompt":"A photo of a sleeping cat."},{"id":"p096","prompt":"A photo of a yawning dog."},{"id":"p097","prompt":"A convertable car."},{"id":"p098","prompt":"Image of a cat wearing a floral shirt."},{"id":"p099","prompt":"A pot of flowers."},{"id":"p100","prompt":"A convertable car."},{"id":"p101","prompt":"A photo of a cat from behind."},{"id":"p102","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p103","prompt":"An image of a post apocalyptic road."},{"id":"p104","prompt":"A goat to the right of a cat."},{"id":"p105","prompt":"A basket of oranges."},{"id":"p106","prompt":"A race car."},{"id":"p107","prompt":"A photo of a vase of daisies."},{"id":"p108","prompt":"A standing bear."},{"id":"p109","prompt":"A white horse in Anime style."},{"id":"p110","prompt":"A race car."},{"id":"p111","prompt":"A basket of oranges."},{"id":"p112","prompt":"A car in futuristic art style."},{"id":"p113","prompt":"A photo of a jumping cat."},{"id":"p114","prompt":"A photo of a vase of colorful tulips."},{"id":"p115","prompt":"A race car."},{"id":"p116","prompt":"A convertable car."},{"id":"p117","prompt":"A cookie next to a glass of juice."},{"id":"p118","prompt":"A photo of a cat wearing a hat."},{"id":"p119","prompt":"A torn up teddy bear."},{"id":"p120","prompt":"A bowl of apples."},{"id":"p121","prompt":"A photo of a jumping dog."},{"id":"p122","prompt":"A race car."},{"id":"p123","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p124","prompt":"A photo of a yawning dog."},{"id":"p125","prompt":"A photo of a cat in a grass field."},{"id":"p126","prompt":"A convertable car."},{"id":"p127","prompt":"A photo of a couple holding their hands on a beach."},{"id":"p128","prompt":"A pot of flowers."},{"id":"p129","prompt":"A photo of a horse."},{"id":"p130","prompt":"A standing bear."},{"id":"p131","prompt":"A bowl of apples."},{"id":"p132","prompt":"A photo of a vase of daisies."},{"id":"p133","prompt":"Pizza with pepperoni."},{"id":"p134","prompt":"A goat to the right of a cat."},{"id":"p135","prompt":"A photo of a willow tree."},{"id":"p136","prompt":"A road in futuristic art style."},{"id":"p137","prompt":"A photo of a yawning dog."},{"id":"p138","prompt":"A photo of a cat wearing a hat."},{"id":"p139","prompt":"A photo of a cat in a grass field."},{"id":"p140","prompt":"A photo of a sleeping cat."},{"id":"p141","prompt":"A standing elephant."},{"id":"p142","prompt":"A torn up teddy bear."},{"id":"p143","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p144","prompt":"A photo of a jumping dog."},{"id":"p145","prompt":"A torn up teddy bear."},{"id":"p146","prompt":"A parade on a street."},{"id":"p147","prompt":"A photo of a cat yawning."},{"id":"p148","prompt":"A torn up teddy bear."},{"id":"p149","prompt":"A road in futuristic art style."},{"id":"p150","prompt":"A photo of a car in Manhattan."},{"id":"p151","prompt":"A photo of a zebra."},{"id":"p152","prompt":"Image of a cat wearing a floral shirt."},{"id":"p153","prompt":"A photo of a cat wearing a hat."},{"id":"p154","prompt":"A photo of a cat yawning."},{"id":"p155","prompt":"A dog smoking a cigar."},{"id":"p156","prompt":"A photo of a cat from behind."},{"id":"p157","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p158","prompt":"A photo of a vase of red roses."},{"id":"p159","prompt":"A photo of a traffic jam."},{"id":"p160","prompt":"A convertible car."},{"id":"p161","prompt":"A race car."},{"id":"p162","prompt":"A basket of oranges."},{"id":"p163","prompt":"A photo of a jumping cat."},{"id":"p164","prompt":"A race car."},{"id":"p165","prompt":"A circus horse."},{"id":"p166","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p167","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p168","prompt":"A photo of a vase of daisies."},{"id":"p169","prompt":"A pot of flowers."},{"id":"p170","prompt":"A photo of a willow tree."},{"id":"p171","prompt":"A photo of a willow tree."},{"id":"p172","prompt":"A photo of a cat facing the camera."},{"id":"p173","prompt":"A cyclist riding in a street."},{"id":"p174","prompt":"A photo of a standing cat."},{"id":"p175","prompt":"A photo of a cat yawning."},{"id":"p176","prompt":"A basket of oranges."},{"id":"p177","prompt":"A bowl of apples."},{"id":"p178","prompt":"A standing elephant."},{"id":"p179","prompt":"A parade on a street."},{"id":"p180","prompt":"A vase of flowers as a child’s drawing."},{"id":"p181","prompt":"A photo of a cat yawning."},{"id":"p182","prompt":"A photo of a jumping dog."},{"id":"p183","prompt":"A basket of oranges."},{"id":"p184","prompt":"A photo of a cat from behind."},{"id":"p185","prompt":"A photo of a willow tree."},{"id":"p186","prompt":"A photo of a zebra."},{"id":"p187","prompt":"A photo of a jumping dog."},{"id":"p188","prompt":"A photo of a cat wearing a hat."},{"id":"p189","prompt":"A car in the year 1940."},{"id":"p190","prompt":"A bowl of apples."},{"id":"p191","prompt":"A photo of a cat in a grass field."},{"id":"p192","prompt":"Pizza with pepperoni."},{"id":"p193","prompt":"A road in futuristic art style."},{"id":"p194","prompt":"A car in futuristic art style."},{"id":"p195","prompt":"A pot of flowers."},{"id":"p196","prompt":"A standing bear."},{"id":"p197","prompt":"A photo of a jumping dog."},{"id":"p198","prompt":"A photo of a jumping dog."},{"id":"p199","prompt":"A convertable car."},{"id":"p200","prompt":"A photo of a vase of red roses."},{"id":"p201","prompt":"A car in the year 1940."},{"id":"p202","prompt":"A convertable car."},{"id":"p203","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p204","prompt":"A photo of a cat wearing a hat."},{"id":"p205","prompt":"A photo of a couple holding their hands on a beach."},{"id":"p206","prompt":"A photo of a cat wearing a hat and glasses."},{"id":"p207","prompt":"A basket of oranges."},{"id":"p208","prompt":"A photo of a horse."},{"id":"p209","prompt":"A photo of a vase of daisies."},{"id":"p210","prompt":"Pizza with pepperoni."},{"id":"p211","prompt":"A photo of a jumping dog."},{"id":"p212","prompt":"A photo of a vase of colorful tulips."},{"id":"p213","prompt":"A photo of a jumping dog."},{"id":"p214","prompt":"A photo of a yawning dog."},{"id":"p215","prompt":"A cyclist riding in a street."},{"id":"p216","prompt":"A photo of a couple holding their hands on a beach."},{"id":"p217","prompt":"A photo of a vase of daisies."},{"id":"p218","prompt":"A photo of a cat yawning."},{"id":"p219","prompt":"A bowl of apples."},{"id":"p220","prompt":"A photo of a horse."},{"id":"p221","prompt":"A convertible car."},{"id":"p222","prompt":"A pot of flowers."},{"id":"p223","prompt":"A photo of a cat in a grass field."},{"id":"p224","prompt":"A pot of flowers."},{"id":"p225","prompt":"A photo of a yawning dog."},{"id":"p226","prompt":"A photo of a cat in a grass field."},{"id":"p227","prompt":"A photo of a cat yawning."},{"id":"p228","prompt":"A circus horse."},{"id":"p229","prompt":"A horse in a show jumping attire."},{"id":"p230","prompt":"A photo of a car in Manhattan."},{"id":"p231","prompt":"A photo of a couple holding their hands on a beach."},{"id":"p232","prompt":"A white horse in Anime style."},{"id":"p233","prompt":"A horse in a show jumping attire."},{"id":"p234","prompt":"A pot of flowers."},{"id":"p235","prompt":"A photo of a cat yawning."},{"id":"p236","prompt":"A photo of a vase of red roses."},{"id":"p237","prompt":"A photo of a standing cat."},{"id":"p238","prompt":"A photo of a yawning dog."},{"id":"p239","prompt":"A photo of a traffic jam."},{"id":"p240","prompt":"A road in futuristic art style."},{"id":"p241","prompt":"A photo of a sleeping cat."},{"id":"p242","prompt":"A bear eating a fish."},{"id":"p243","prompt":"A photo of a jumping dog."},{"id":"p244","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p245","prompt":"A photo of a cat in a grass field."},{"id":"p246","prompt":"A cyclist riding in a street."},{"id":"p247","prompt":"A photo of a cat facing the camera."},{"id":"p248","prompt":"A basket of oranges."},{"id":"p249","prompt":"A bowl of apples."},{"id":"p250","prompt":"A convertible car."},{"id":"p251","prompt":"A photo of a vase of red roses."},{"id":"p252","prompt":"A photo of a car in Manhattan."},{"id":"p253","prompt":"A dog smoking a cigar."},{"id":"p254","prompt":"A torn up teddy bear."},{"id":"p255","prompt":"A photo of a standing cat."},{"id":"p256","prompt":"A goat to the right of a cat."},{"id":"p257","prompt":"A bear eating a fish."},{"id":"p258","prompt":"Pizza with pepperoni."},{"id":"p259","prompt":"A bear eating a fish."},{"id":"p260","prompt":"An image of a post apocalyptic road."},{"id":"p261","prompt":"A white horse in Anime style."},{"id":"p262","prompt":"A photo of a traffic jam."},{"id":"p263","prompt":"A cyclist riding in a street."},{"id":"p264","prompt":"Image of a cat wearing a floral shirt."},{"id":"p265","prompt":"A basket of oranges."},{"id":"p266","prompt":"A photo of a standing cat."},{"id":"p267","prompt":"A car in futuristic art style."},{"id":"p268","prompt":"A bowl of apples."},{"id":"p269","prompt":"A photo of a yawning dog."},{"id":"p270","prompt":"A horse in a show jumping attire."},{"id":"p271","prompt":"A car in futuristic art style."},{"id":"p272","prompt":"A photo of a sleeping cat."},{"id":"p273","prompt":"An image of a post apocalyptic road."},{"id":"p274","prompt":"A photo of a standing cat."},{"id":"p275","prompt":"A photo of a willow tree."},{"id":"p276","prompt":"A parade on a street."},{"id":"p277","prompt":"A torn up teddy bear."},{"id":"p278","prompt":"A photo of a cat from behind."},{"id":"p279","prompt":"A photo of a car in Manhattan."},{"id":"p280","prompt":"A photo of a tomato in a blue tennis court."},{"id":"p281","prompt":"A car in the year 1940."},{"id":"p282","prompt":"A photo of a cat from behind."},{"id":"p283","prompt":"A car in futuristic art style."},{"id":"p284","prompt":"Pizza with pepperoni."},{"id":"p285","prompt":"A photo of a sleeping cat."},{"id":"p286","prompt":"A basket of oranges."},{"id":"p287","prompt":"A basket of oranges."},{"id":"p288","prompt":"A photo of a cat wearing a hat."},{"id":"p289","prompt":"A dog smoking a cigar."},{"id":"p290","prompt":"A circus horse."},{"id":"p291","prompt":"A horse in a show jumping attire."},{"id":"p292","prompt":"A cookie next to a glass of juice."},{"id":"p293","prompt":"A standing bear."},{"id":"p294","prompt":"A photo of a jumping dog."},{"id":"p295","prompt":"A photo of a jumping dog."},{"id":"p296","prompt":"A photo of a standing cat."},{"id":"p297","prompt":"Pizza with pepperoni."},{"id":"p298","prompt":"A convertible car."},{"id":"p299","prompt":"A photo of a vase of red roses."},{"id":"p300","prompt":"A race car."}];
+const PROMPT_IT = {"A basket of oranges.":"Un cesto di arance.","A bear eating a fish.":"Un orso che mangia un pesce.","A bowl of apples.":"Una ciotola di mele.","A car in futuristic art style.":"Un'auto in stile artistico futuristico.","A car in the year 1940.":"Un'auto dell'anno 1940.","A circus horse.":"Un cavallo da circo.","A convertable car.":"Un'auto decappottabile.","A convertible car.":"Un'auto decappottabile.","A cookie next to a glass of juice.":"Un biscotto accanto a un bicchiere di succo.","A cyclist riding in a street.":"Un ciclista che pedala in una strada.","A dog smoking a cigar.":"Un cane che fuma un sigaro.","A goat to the right of a cat.":"Una capra alla destra di un gatto.","A horse in a show jumping attire.":"Un cavallo bardato per il salto ostacoli.","A parade on a street.":"Una parata in una strada.","A photo of a car in Manhattan.":"Una foto di un'auto a Manhattan.","A photo of a cat facing the camera.":"Una foto di un gatto rivolto verso l'obiettivo.","A photo of a cat from behind.":"Una foto di un gatto visto da dietro.","A photo of a cat in a grass field.":"Una foto di un gatto in un prato.","A photo of a cat wearing a hat and glasses.":"Una foto di un gatto con cappello e occhiali.","A photo of a cat wearing a hat.":"Una foto di un gatto con il cappello.","A photo of a cat yawning.":"Una foto di un gatto che sbadiglia.","A photo of a couple holding their hands on a beach.":"Una foto di una coppia che si tiene per mano su una spiaggia.","A photo of a horse.":"Una foto di un cavallo.","A photo of a jumping cat.":"Una foto di un gatto che salta.","A photo of a jumping dog.":"Una foto di un cane che salta.","A photo of a sleeping cat.":"Una foto di un gatto che dorme.","A photo of a standing cat.":"Una foto di un gatto in piedi.","A photo of a tomato in a blue tennis court.":"Una foto di un pomodoro su un campo da tennis blu.","A photo of a traffic jam.":"Una foto di un ingorgo stradale.","A photo of a vase of colorful tulips.":"Una foto di un vaso di tulipani colorati.","A photo of a vase of daisies.":"Una foto di un vaso di margherite.","A photo of a vase of red roses.":"Una foto di un vaso di rose rosse.","A photo of a willow tree.":"Una foto di un salice.","A photo of a yawning dog.":"Una foto di un cane che sbadiglia.","A photo of a zebra.":"Una foto di una zebra.","A pot of flowers.":"Un vaso di fiori.","A race car.":"Un'auto da corsa.","A road in futuristic art style.":"Una strada in stile artistico futuristico.","A standing bear.":"Un orso in piedi.","A standing elephant.":"Un elefante in piedi.","A standing horse.":"Un cavallo in piedi.","A torn up teddy bear.":"Un orsacchiotto di peluche strappato.","A vase of flowers as a child’s drawing.":"Un vaso di fiori come in un disegno di un bambino.","A white horse in Anime style.":"Un cavallo bianco in stile anime.","An image of a post apocalyptic road.":"Un'immagine di una strada post-apocalittica.","Image of a cat wearing a floral shirt.":"Immagine di un gatto con una camicia a fiori.","Pizza with pepperoni.":"Pizza con salamino piccante."};
 const N = PAIRS.length;
+const I18N = {
+  en: {
+    title: "Edit Failure Study", instructions: "Instructions", before: "Before you start",
+    help_title: "Rate how badly an image edit has failed",
+    help_p1: "Each item shows two results of the same image editor, run with the same text prompt and the same random seed. The <strong>left</strong> image is the reference: the edit made from the original photo. The <strong>right</strong> image was made from a version of the photo that may have been altered so that editing goes wrong; some items are controls, so the right image can also be a normal edit or exactly the reference.",
+    help_p2: "Compared with the reference, how badly has the edit on the right failed?",
+    anchor1_long: "Identical to the reference, or the requested edit is fully carried out with no damage.",
+    anchor4_long: "Visible damage, but the requested edit is still partly recognizable.",
+    anchor7_long: "The edit is destroyed: the requested change is missing, or the image is ruined.",
+    tip_between: "Use 2, 3, 5 and 6 for the levels in between.",
+    tip_look: "Look at whether the requested change is there, whether the subject is still recognizable, and at noise, blur, color or texture damage, and changes to parts of the image that should stay as they were.",
+    tip_pose: "Differences of pose or framing that a different but valid edit could also have produced count less than damage.",
+    tip_time: "There are 300 items, about 30 to 40 minutes in all. Every rating is sent at once and also kept in this browser: you can stop and come back later on the same device and browser.",
+    tip_keys: "Keyboard: <kbd>1</kbd>–<kbd>7</kbd> rate and move on, <kbd>←</kbd> goes back, <kbd>→</kbd> goes forward to items you already rated.",
+    name_label: "Your name or initials (optional)", name_ph: "e.g. A.B.",
+    privacy: "Ratings go only to the study's organizers.",
+    start: "Start rating", resume: "Continue ({n} / {N} rated)",
+    progress: "{n} / {N} rated", item: "Item {i} of {N}", prompt_label: "Prompt:",
+    ref_label: "Reference edit", rate_label: "Edit to rate",
+    img_alt: "Left: reference edit. Right: the edit to rate.",
+    scale_aria: "Rating from 1 (no failure) to 7 (edit destroyed)",
+    anchor1: "1 identical / edit done", anchor4: "4 damaged, edit still recognizable", anchor7: "7 edit destroyed",
+    back: "← Back", forward: "Forward →", rated_hint: "Rated {r}. Press another number to change it.",
+    finished: "Finished", done_title: "All 300 items are rated. Thank you.",
+    done_sent: "Your ratings have been sent.",
+    done_waiting: "Some ratings are still waiting to be sent; keep this page open for a moment, or download them as a backup.",
+    review: "Review my ratings", download: "Download my ratings (backup)",
+    st_loading: "Loading…", st_local: "Saved on this device only", st_waiting: "{n} waiting to be sent",
+    st_sent: "All ratings sent", st_ready: "Ready", st_sending: "Sending…",
+    not_connected: "This copy of the page is not connected to the study: ratings stay in this browser only. Use the link the organizers sent you.",
+  },
+  it: {
+    title: "Valutazione delle modifiche", instructions: "Istruzioni", before: "Prima di iniziare",
+    help_title: "Valuta quanto è fallita una modifica di un'immagine",
+    help_p1: "Ogni elemento mostra due risultati dello stesso programma di modifica delle immagini, ottenuti con la stessa descrizione testuale e lo stesso seme casuale. L'immagine a <strong>sinistra</strong> è il riferimento: la modifica fatta a partire dalla foto originale. L'immagine a <strong>destra</strong> è stata ottenuta da una versione della foto che potrebbe essere stata alterata per far fallire la modifica; alcuni elementi sono di controllo, quindi l'immagine a destra può anche essere una modifica normale o esattamente il riferimento.",
+    help_p2: "Rispetto al riferimento, quanto è fallita la modifica a destra?",
+    anchor1_long: "Identica al riferimento, oppure la modifica richiesta è eseguita del tutto e senza danni.",
+    anchor4_long: "Danni visibili, ma la modifica richiesta è ancora in parte riconoscibile.",
+    anchor7_long: "La modifica è distrutta: il cambiamento richiesto manca, oppure l'immagine è rovinata.",
+    tip_between: "Usa 2, 3, 5 e 6 per i livelli intermedi.",
+    tip_look: "Guarda se il cambiamento richiesto c'è, se il soggetto è ancora riconoscibile, e se ci sono rumore, sfocature, danni ai colori o alle texture, o cambiamenti in parti dell'immagine che dovevano restare com'erano.",
+    tip_pose: "Differenze di posa o di inquadratura che anche una modifica diversa ma valida avrebbe potuto produrre contano meno dei danni.",
+    tip_time: "Gli elementi sono 300, circa 30-40 minuti in tutto. Ogni voto viene inviato subito e salvato anche in questo browser: puoi interrompere e riprendere più tardi sullo stesso dispositivo e browser.",
+    tip_keys: "Tastiera: <kbd>1</kbd>–<kbd>7</kbd> per votare e passare al successivo, <kbd>←</kbd> per tornare indietro, <kbd>→</kbd> per andare avanti agli elementi già valutati.",
+    name_label: "Il tuo nome o le tue iniziali (facoltativo)", name_ph: "es. A.B.",
+    privacy: "I voti arrivano solo agli organizzatori dello studio.",
+    start: "Inizia", resume: "Continua ({n} / {N} valutati)",
+    progress: "{n} / {N} valutati", item: "Elemento {i} di {N}", prompt_label: "Modifica richiesta:",
+    ref_label: "Modifica di riferimento", rate_label: "Modifica da valutare",
+    img_alt: "A sinistra la modifica di riferimento, a destra quella da valutare.",
+    scale_aria: "Voto da 1 (nessun fallimento) a 7 (modifica distrutta)",
+    anchor1: "1 identica / modifica riuscita", anchor4: "4 danneggiata, ancora riconoscibile", anchor7: "7 modifica distrutta",
+    back: "← Indietro", forward: "Avanti →", rated_hint: "Voto {r}. Premi un altro numero per cambiarlo.",
+    finished: "Finito", done_title: "Hai valutato tutti i 300 elementi. Grazie.",
+    done_sent: "I tuoi voti sono stati inviati.",
+    done_waiting: "Alcuni voti devono ancora essere inviati: tieni aperta la pagina per un momento, oppure scaricali come copia di sicurezza.",
+    review: "Rivedi i miei voti", download: "Scarica i miei voti (copia di sicurezza)",
+    st_loading: "Caricamento…", st_local: "Salvati solo su questo dispositivo", st_waiting: "{n} in attesa di invio",
+    st_sent: "Tutti i voti inviati", st_ready: "Pronto", st_sending: "Invio…",
+    not_connected: "Questa copia della pagina non è collegata allo studio: i voti restano solo in questo browser. Usa il link che ti hanno mandato gli organizzatori.",
+  },
+};
 const $ = (id) => document.getElementById(id);
 const store = {
   get(k, d) { try { const v = localStorage.getItem("efs." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
@@ -197,22 +268,48 @@ function newId() {
   try { if (crypto.randomUUID) return crypto.randomUUID(); } catch {}
   return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12) + Math.random().toString(36).slice(2, 12);
 }
-const state = { id: store.get("id", null), name: store.get("name", ""), ratings: store.get("ratings", {}), outbox: store.get("outbox", []), order: [], pos: 0, shownAt: 0, sending: false };
+function initialLang() {
+  try { const q = new URLSearchParams(location.search).get("lang"); if (q === "it" || q === "en") return q; } catch {}
+  const s = store.get("lang", null); if (s === "it" || s === "en") return s;
+  return (navigator.language || "").toLowerCase().startsWith("it") ? "it" : "en";
+}
+const state = { id: store.get("id", null), name: store.get("name", ""), ratings: store.get("ratings", {}), outbox: store.get("outbox", []),
+  order: [], pos: 0, shownAt: 0, sending: false, lang: initialLang(), status: ["st_loading", ""], view: "help" };
 if (!state.id) { state.id = newId(); store.set("id", state.id); }
+function t(key, vars) { let s = (I18N[state.lang] || I18N.en)[key] ?? I18N.en[key] ?? key; for (const k in (vars || {})) s = s.replaceAll("{" + k + "}", vars[k]); return s; }
+function promptText(p) { return state.lang === "it" ? (PROMPT_IT[p] || p) : p.replace(/�/g, "’"); }
 
 function hashString(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
-function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let x = Math.imul(a ^ a >>> 15, 1 | a); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; }
 function shuffled(seed) { const rnd = mulberry32(seed), a = PAIRS.map((_, i) => i); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 state.order = shuffled(hashString(state.id));
 
-function setStatus(text, kind) { const s = $("status"); s.textContent = text; s.className = "chip" + (kind ? " " + kind : ""); }
+function setStatus(key, kind, vars) { state.status = [key, kind || "", vars || {}]; const s = $("status"); s.textContent = t(key, vars); s.className = "chip" + (kind ? " " + kind : ""); }
 function ratedCount() { return Object.keys(state.ratings).filter((k) => state.ratings[k] && state.ratings[k].r).length; }
-function renderProgress() { const n = ratedCount(); $("progress").textContent = n + " / " + N + " rated"; $("meter").style.width = (100 * n / N) + "%"; }
+function renderProgress() { const n = ratedCount(); $("progress").textContent = t("progress", { n, N }); $("meter").style.width = (100 * n / N) + "%"; }
 function firstUnrated() { const i = state.order.findIndex((k) => !state.ratings[PAIRS[k].id]); return i < 0 ? N : i; }
+function connected() { return ENDPOINT && !ENDPOINT.startsWith("__"); }
 function statusAtRest() {
-  if (!ENDPOINT || ENDPOINT.startsWith("__")) setStatus("Saved on this device only", "warn");
-  else if (state.outbox.length) setStatus(state.outbox.length + " waiting to be sent", "warn");
-  else setStatus(ratedCount() ? "All ratings sent" : "Ready", "ok");
+  if (!connected()) setStatus("st_local", "warn");
+  else if (state.outbox.length) setStatus("st_waiting", "warn", { n: state.outbox.length });
+  else setStatus(ratedCount() ? "st_sent" : "st_ready", "ok");
+}
+
+function applyLang() {
+  document.documentElement.lang = state.lang;
+  document.title = t("title");
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n-html]")) el.innerHTML = t(el.dataset.i18nHtml);
+  for (const b of document.querySelectorAll(".lang button")) b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang));
+  $("name").placeholder = t("name_ph");
+  $("pair-img").alt = t("img_alt");
+  $("scale").setAttribute("aria-label", t("scale_aria"));
+  $("start").textContent = ratedCount() ? t("resume", { n: ratedCount(), N }) : t("start");
+  if (!connected()) { const n = $("access-note"); n.hidden = false; n.textContent = t("not_connected"); }
+  setStatus(state.status[0], state.status[1], state.status[2]);
+  renderProgress();
+  if (state.view === "task") show(state.pos, true);
+  if (state.view === "done") show(N, true);
 }
 
 const scale = $("scale");
@@ -224,29 +321,34 @@ for (let v = 1; v <= 7; v++) {
 }
 function preload(pos) { for (let k = 1; k <= 3; k++) { const p = state.order[pos + k]; if (p !== undefined) { const im = new Image(); im.src = "pairs/" + PAIRS[p].id + ".jpg"; } } }
 
-function show(pos) {
-  if (pos >= N) { $("task").hidden = true; $("done").hidden = false; renderProgress(); $("done-status").textContent = state.outbox.length ? "Some ratings are still waiting to be sent; keep this page open for a moment, or download them as a backup." : "Your ratings have been sent."; return; }
+function show(pos, keepTimer) {
+  if (pos >= N) {
+    state.view = "done"; $("task").hidden = true; $("done").hidden = false; renderProgress();
+    $("done-status").textContent = state.outbox.length ? t("done_waiting") : t("done_sent");
+    return;
+  }
+  state.view = "task";
   state.pos = Math.max(0, pos);
   const pair = PAIRS[state.order[state.pos]];
   $("done").hidden = true; $("task").hidden = false;
-  $("item-label").textContent = "Item " + (state.pos + 1) + " of " + N;
-  $("prompt").textContent = pair.prompt;
+  $("item-label").textContent = t("item", { i: state.pos + 1, N });
+  $("prompt").textContent = promptText(pair.prompt);
   $("pair-img").src = "pairs/" + pair.id + ".jpg";
   const cur = state.ratings[pair.id];
   for (const b of scale.children) b.setAttribute("aria-pressed", String(!!cur && cur.r === Number(b.dataset.v)));
   $("back").disabled = state.pos === 0;
   $("forward").disabled = !(cur && cur.r) || state.pos >= N - 1;
-  $("item-hint").textContent = cur && cur.r ? "Rated " + cur.r + ". Press another number to change it." : "";
-  state.shownAt = performance.now();
+  $("item-hint").textContent = cur && cur.r ? t("rated_hint", { r: cur.r }) : "";
+  if (!keepTimer) state.shownAt = performance.now();
   renderProgress(); preload(state.pos);
 }
 
 async function flush() {
-  if (state.sending || !state.outbox.length || !ENDPOINT || ENDPOINT.startsWith("__")) { statusAtRest(); return; }
+  if (state.sending || !state.outbox.length || !connected()) { statusAtRest(); return; }
   state.sending = true;
   const batch = state.outbox.slice(0, 50);
-  const body = JSON.stringify({ annotator: state.id, name: state.name, version: VERSION, items: batch });
-  setStatus("Sending…");
+  const body = JSON.stringify({ annotator: state.id, name: state.name, version: VERSION + "-" + state.lang, items: batch });
+  setStatus("st_sending");
   let sent = false;
   try {
     const res = await fetch(ENDPOINT, { method: "POST", body });
@@ -259,13 +361,13 @@ async function flush() {
   state.sending = false;
   if (sent && state.outbox.length) setTimeout(flush, 300);
   else statusAtRest();
-  if (!$("done").hidden) show(N);
+  if (state.view === "done") show(N);
 }
 setInterval(() => { if (state.outbox.length) flush(); }, 30000);
 window.addEventListener("online", flush);
 
 function rate(v) {
-  if (state.pos >= N) return;
+  if (state.view !== "task" || state.pos >= N) return;
   const pid = PAIRS[state.order[state.pos]].id;
   const entry = { r: v, t: new Date().toISOString(), ms: Math.round(performance.now() - state.shownAt), pos: state.pos };
   state.ratings[pid] = entry;
@@ -276,6 +378,7 @@ function rate(v) {
   show(next < 0 ? firstUnrated() : next);
 }
 
+for (const b of document.querySelectorAll(".lang button")) b.addEventListener("click", () => { state.lang = b.dataset.lang; store.set("lang", state.lang); applyLang(); });
 $("back").addEventListener("click", () => show(state.pos - 1));
 $("forward").addEventListener("click", () => show(state.pos + 1));
 $("review").addEventListener("click", () => show(N - 1));
@@ -284,24 +387,19 @@ $("name").value = state.name;
 $("name").addEventListener("change", () => { state.name = $("name").value.trim().slice(0, 80); store.set("name", state.name); });
 $("start").addEventListener("click", () => { state.name = $("name").value.trim().slice(0, 80); store.set("name", state.name); $("help").hidden = true; show(firstUnrated()); });
 $("download").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify({ annotator: state.id, name: state.name, version: VERSION, ratings: state.ratings }, null, 1)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify({ annotator: state.id, name: state.name, version: VERSION + "-" + state.lang, ratings: state.ratings }, null, 1)], { type: "application/json" });
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "edit-failure-ratings-" + state.id.slice(0, 8) + ".json";
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 });
 document.addEventListener("keydown", (ev) => {
   if (ev.target && (ev.target.tagName === "INPUT" || ev.target.tagName === "TEXTAREA")) return;
-  if ($("task").hidden && $("done").hidden) return;
-  if (/^[1-7]$/.test(ev.key) && !$("task").hidden) { ev.preventDefault(); rate(Number(ev.key)); }
-  else if (ev.key === "ArrowLeft") { ev.preventDefault(); if (!$("done").hidden) show(N - 1); else if (state.pos > 0) show(state.pos - 1); }
-  else if (ev.key === "ArrowRight" && !$("task").hidden) { const cur = state.ratings[PAIRS[state.order[state.pos]].id]; if (cur && cur.r && state.pos < N - 1) { ev.preventDefault(); show(state.pos + 1); } }
+  if (state.view === "help") return;
+  if (/^[1-7]$/.test(ev.key) && state.view === "task") { ev.preventDefault(); rate(Number(ev.key)); }
+  else if (ev.key === "ArrowLeft") { ev.preventDefault(); if (state.view === "done") show(N - 1); else if (state.pos > 0) show(state.pos - 1); }
+  else if (ev.key === "ArrowRight" && state.view === "task") { const cur = state.ratings[PAIRS[state.order[state.pos]].id]; if (cur && cur.r && state.pos < N - 1) { ev.preventDefault(); show(state.pos + 1); } }
 });
 
-if (!ENDPOINT || ENDPOINT.startsWith("__")) {
-  const n = $("access-note"); n.hidden = false;
-  n.textContent = "This copy of the page is not connected to the study: ratings stay in this browser only. Use the link the organizers sent you.";
-}
-if (ratedCount()) $("start").textContent = "Continue (" + ratedCount() + " / " + N + " rated)";
-renderProgress(); flush();
+applyLang(); flush();
 </script>
 </body>
 </html>
