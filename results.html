@@ -253,12 +253,16 @@ function analyse() {
   rows.push({ label: "One annotator vs. the others", tex: "\\gr{One annotator vs.\\ the others}", gray: true,
     rho: mean(annRho), ci: [NaN, NaN], acc: mean(annAcc), n: annRho.length + " ann." });
   const ps = [...H.keys()].filter(real);
+  const mrows = [];
   for (const [f, label, tex, s, ours] of MEASURES) {
     const q = ps.filter((p) => KEY.byId[p][f] != null);
     const x = q.map((p) => s * KEY.byId[p][f]), y = q.map((p) => H.get(p));
     const acc = pairAcc(q, (p) => s * KEY.byId[p][f], (p) => H.get(p));
-    rows.push({ label, tex, ours, rho: spearman(x, y), ci: bootCI(x, y), acc: acc.acc, n: q.length + " / " + acc.n });
+    mrows.push({ label, tex, ours, rho: spearman(x, y), ci: bootCI(x, y), acc: acc.acc, n: q.length + " / " + acc.n });
   }
+  // 16/11: measures sorted by rho, highest first (NaN last); the annotator row stays on top
+  const key = (r) => Number.isNaN(r.rho) ? -Infinity : r.rho;
+  rows.push(...mrows.sort((a, b) => key(b) - key(a)));
   const units = [...per.entries()].filter(([p]) => real(p)).map(([, vs]) => vs.map((v) => v.r));
   const alpha = kalpha(units);
   return { rows, alpha, annInfo, per, H, last, used, nPairs: ps.length };
