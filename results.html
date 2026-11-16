@@ -65,6 +65,9 @@ tr.ours td { background: var(--ours); }
 tr.sep td { border-top: 1px solid var(--line); }
 td .ci { color: var(--muted); font-size: 0.8em; }
 td.na { color: var(--muted); }
+th button.sort { font: inherit; font-weight: 700; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; white-space: nowrap; }
+th button.sort:hover, th button.sort.on { color: var(--accent); }
+th button.sort:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
 .opts { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; font-size: 0.9rem; }
 .opts label { display: inline-flex; gap: 6px; align-items: center; }
 .opts input[type=number] { width: 70px; padding: 4px 6px; }
@@ -288,6 +291,58 @@ function el(tag, attrs = {}, ...kids) {
   for (const c of kids) e.append(c instanceof Node ? c : document.createTextNode(String(c)));
   return e;
 }
+// per-method table, sortable by clicking a column header (16/11); the sort survives the automatic refresh
+const MCOLS = [
+  { label: "Method", get: (r) => r.name, text: true },
+  { label: "Human 8/255", get: (r) => r.a[0] }, { label: "D 8/255", get: (r) => r.a[1] }, { label: "n", get: (r) => r.a[2] },
+  { label: "Human 16/255", get: (r) => r.b[0] }, { label: "D 16/255", get: (r) => r.b[1] }, { label: "n", get: (r) => r.b[2] },
+];
+let mSort = { col: -1, dir: -1 }; // col -1: order of METHOD_ORDER
+let lastA = null;
+function renderMethods(A) {
+  lastA = A;
+  const cell = (inp) => {
+    const ps = [...A.H.keys()].filter((p) => KEY.byId[p].input === inp);
+    return [mean(ps.map((p) => A.H.get(p))), mean(ps.map((p) => KEY.byId[p].judge_D)), ps.length];
+  };
+  const hr = el("tr");
+  MCOLS.forEach((c, j) => {
+    const on = mSort.col === j;
+    const b = el("button", { type: "button", class: "sort" + (on ? " on" : ""), title: "Ordina per " + c.label },
+      c.label + (on ? (mSort.dir > 0 ? " ▲" : " ▼") : ""));
+    b.onclick = () => {
+      if (mSort.col === j) mSort.dir = -mSort.dir; else mSort = { col: j, dir: c.text ? 1 : -1 };
+      renderMethods(lastA);
+    };
+    const th = el("th", { "aria-sort": on ? (mSort.dir > 0 ? "ascending" : "descending") : "none" });
+    th.append(b); hr.append(th);
+  });
+  const tbm = el("tbody");
+  for (const inp of ["identical", "clean_alt"]) {
+    const [h, d, n] = cell(inp);
+    tbm.append(el("tr", { class: "gray" }, el("td", {}, NAMES[inp]), el("td", {}, f2(h)), el("td", {}, f2(d)), el("td", {}, n),
+      el("td", {}, ""), el("td", {}, ""), el("td", {}, "")));
+  }
+  const rows = METHOD_ORDER.map((m, i) => ({ m, i, name: NAMES[m], a: cell(m + "_eps8"), b: cell(m + "_eps16") }));
+  if (mSort.col >= 0) {
+    const c = MCOLS[mSort.col];
+    rows.sort((x, y) => {
+      const p = c.get(x), q = c.get(y);
+      if (c.text) return mSort.dir * String(p).localeCompare(String(q));
+      const pn = Number.isNaN(p), qn = Number.isNaN(q);
+      if (pn || qn) return pn - qn; // missing values last
+      return mSort.dir * (p - q) || x.i - y.i;
+    });
+  }
+  rows.forEach((r, k) => {
+    tbm.append(el("tr", { class: (r.m === "attngen" || r.m === "hybrid-agattn200" ? "ours" : "") + (k === 0 ? " sep" : "") },
+      el("td", {}, r.name), el("td", {}, f2(r.a[0])), el("td", {}, f2(r.a[1])), el("td", {}, r.a[2]),
+      el("td", {}, f2(r.b[0])), el("td", {}, f2(r.b[1])), el("td", {}, r.b[2])));
+  });
+  const tm = $("tab-methods"); tm.replaceChildren();
+  tm.append(el("thead", {}, hr), tbm);
+  tm.append(el("caption", {}, "Mean human rating (1–7) and judge D on the same rated edits; n: rated edits (15 sampled per method and budget, 3 per editor). The noise floor and the identical pairs do not depend on the budget. Click a column header to sort the methods by it, click again to reverse; the gray rows stay on top."));
+}
 function render() {
   const A = analyse();
   const nAnn = A.annInfo.length, nUsed = A.used.size, nRatings = A.last.size;
@@ -316,26 +371,7 @@ function render() {
     catch { $("copymsg").textContent = ""; const pre = el("pre", {}, lines.join("\n")); $("copy").parentElement.after(pre); }
   };
 
-  // per method
-  const tm = $("tab-methods"); tm.replaceChildren();
-  tm.append(el("thead", {}, el("tr", {}, el("th", {}, "Method"), el("th", {}, "Human 8/255"), el("th", {}, "D 8/255"), el("th", {}, "n"),
-    el("th", {}, "Human 16/255"), el("th", {}, "D 16/255"), el("th", {}, "n"))));
-  const tbm = el("tbody");
-  const cell = (inp) => {
-    const ps = [...A.H.keys()].filter((p) => KEY.byId[p].input === inp);
-    return [f2(mean(ps.map((p) => A.H.get(p)))), f2(mean(ps.map((p) => KEY.byId[p].judge_D))), ps.length];
-  };
-  for (const inp of ["identical", "clean_alt"]) {
-    const [h, d, n] = cell(inp);
-    tbm.append(el("tr", { class: "gray" }, el("td", {}, NAMES[inp]), el("td", {}, h), el("td", {}, d), el("td", {}, n), el("td", {}, ""), el("td", {}, ""), el("td", {}, "")));
-  }
-  METHOD_ORDER.forEach((m, i) => {
-    const a = cell(m + "_eps8"), b = cell(m + "_eps16");
-    tbm.append(el("tr", { class: (m === "attngen" || m === "hybrid-agattn200" ? "ours" : "") + (i === 0 ? " sep" : "") },
-      el("td", {}, NAMES[m]), ...a.map((v) => el("td", {}, v)), ...b.map((v) => el("td", {}, v))));
-  });
-  tm.append(tbm);
-  tm.append(el("caption", {}, "Mean human rating (1–7) and judge D on the same rated edits; n: rated edits (15 sampled per method and budget, 3 per editor). The noise floor and the identical pairs do not depend on the budget."));
+  renderMethods(A);
 
   // annotators
   const ta = $("tab-ann"); ta.replaceChildren();
